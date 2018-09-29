@@ -75,14 +75,8 @@ defmodule Exred.Node.Picar do
     case msg.payload do
       "stop" ->
         RearWheels.stop
-      "faster" ->
-        RearWheels.faster
-      "slower" ->
-        RearWheels.slower
-      "forward" ->
-        RearWheels.forward
-      "backward" -> 
-        RearWheels.backward
+      {"speed", speed} ->
+        RearWheels.speed(speed)
       {"left", angle} ->
         FrontWheels.left angle
       {"right", angle} ->

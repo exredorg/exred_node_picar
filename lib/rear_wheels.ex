@@ -26,7 +26,7 @@ defmodule Exred.Node.Picar.RearWheels do
     GenServer.call(__MODULE__, :stop)
   end
 
-  def speed do
+  def speed(speed) do
     GenServer.call(__MODULE__, {:set_speed, speed})
   end 
 
@@ -63,9 +63,9 @@ defmodule Exred.Node.Picar.RearWheels do
     {:noreply, state, 200}
   end
   
-  def handle_info(:timeout, %{speed: speed, target_speed: target} = state) do
+  def handle_info(:timeout, %{speed: speed, target_speed: target, gpio_pid_motor_a: gpio_a, gpio_pid_motor_b: gpio_b} = state) do
     # calculate a possible new speed value
-    proposed = speed + (target-speed)/abs(target-speed) * 5
+    proposed = round(speed + (target-speed)/abs(target-speed) * 5)
     
     # if proposed is close to the target then skip straight to the target
     new_speed = if abs(target-proposed) < 5 do
@@ -80,12 +80,12 @@ defmodule Exred.Node.Picar.RearWheels do
     
     # change direction if speed value goes from positive to negative or vice versa
     cond do
-      speed > 0 and new_speed < 0 ->
-        GPIO.write gpio_pid_motor_a, @backward
-        GPIO.write gpio_pid_motor_b, @backward
-      speed < 0 and new_speed > 0 ->
-          GPIO.write gpio_pid_motor_a, @forward
-          GPIO.write gpio_pid_motor_b, @forward
+      speed >= 0 and new_speed < 0 ->
+        GPIO.write gpio_a, @backward
+        GPIO.write gpio_b, @backward
+      speed <= 0 and new_speed > 0 ->
+        GPIO.write gpio_a, @forward
+        GPIO.write gpio_b, @forward
       true ->
         :pass
     end
@@ -117,7 +117,7 @@ defmodule Exred.Node.Picar.RearWheels do
   #
   # we use the signum of the speed to indicate direction so to calculate 
   # pulse width we need the absolute of speed
-  defp pulse_width(speed) when speed>=0 and speed<=100, do: abs(speed) * 40
+  defp pulse_width(speed) when speed>=-100 and speed<=100, do: abs(speed) * 40
 
 end
 
