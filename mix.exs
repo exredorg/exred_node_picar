@@ -1,6 +1,8 @@
 defmodule Exred.Node.Picar.MixProject do
   use Mix.Project
 
+  @description "Exred node to control a SunFounder PiCar"
+
   def project do
     [
       app: :exred_node_picar,
@@ -8,6 +10,8 @@ defmodule Exred.Node.Picar.MixProject do
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
       deps: deps()
+      description: @description,
+      package: @package
     ]
   end
 
