@@ -31,63 +31,50 @@ defmodule Exred.Node.Picar do
   }
   @ui_attributes %{left_icon: "directions_car"}
 
-
-  alias Exred.Scheduler.DaemonNodeSupervisor
   alias Exred.Node.Picar.FrontWheels
   alias Exred.Node.Picar.RearWheels
-
-  use Exred.Library.NodePrototype
-  
   require Logger
-
+  use Exred.NodePrototype
 
   @impl true
-  def node_init(state) do
-    children = [
+  def daemon_child_specs(config) do
+    [
       %{
         id: I2C,
         start: {ElixirALE.I2C, :start_link, [@i2c_device, @i2c_address, [name: :i2c]]}
-        #start: {ElixirALE.I2C, :start_link, [state.config.i2c_device.value, state.config.i2c_address.value, [name: :i2c]]}
       },
       Exred.Node.Picar.PWM,
       Exred.Node.Picar.RearWheels,
       Exred.Node.Picar.FrontWheels
     ]
-
-    # start children
-    Enum.each children, fn(child) ->
-      case DaemonNodeSupervisor.start_child(child) do
-        {:ok, _pid} -> :ok
-        {:error, {:already_started, _pid}} -> :ok
-        {:error, other} ->
-          event = "notification"
-          debug_data = %{msg: "Could not initialize " <> @name}
-          event_msg = %{node_id: state.node_id, node_name: @name, debug_data: debug_data}
-          EventChannelClient.broadcast event, event_msg
-      end
-    end
-
-    state
   end
 
   @impl true
   def handle_msg(msg, state) do
     case msg.payload do
       "stop" ->
-        RearWheels.stop
+        RearWheels.stop()
+
       {"speed", speed} ->
         RearWheels.speed(speed)
+
       {"left", angle} ->
-        FrontWheels.left angle
+        FrontWheels.left(angle)
+
       {"right", angle} ->
-        FrontWheels.right angle
-      "straight" -> 
-        FrontWheels.straight
+        FrontWheels.right(angle)
+
+      "straight" ->
+        FrontWheels.straight()
+
       _ ->
-         Logger.warn "UNHANDLED MSG node: #{state.node_id} #{get_in(state.config, [:name, :value])} msg: #{inspect msg}"
+        Logger.warn(
+          "UNHANDLED MSG node: #{state.node_id} #{get_in(state.config, [:name, :value])} msg: #{
+            inspect(msg)
+          }"
+        )
     end
+
     {nil, state}
   end
-
 end
-
