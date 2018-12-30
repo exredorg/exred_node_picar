@@ -1,29 +1,51 @@
-package main
+package picar
 
 import (
 	"fmt"
 	"os"
 	"time"
+	pb "usd/exredrpc"
 
-	"github.com/stianeikeland/go-rpio"
+	rpio "github.com/stianeikeland/go-rpio"
 )
 
-func main() {
-	fmt.Printf("hello, world\n")
-	for i := 0; i < 100; i++ {
-		ping()
+// BondID is the ID that the gRPC client will use to connect to the gRPC Twin node
+const BondID = "hellooo"
+
+// Setup opens the connection to the GPIO interface
+func setup() {
+	if err := rpio.Open(); err != nil {
+		fmt.Println(err)
+		rpio.Close()
+		os.Exit(1)
+	}
+}
+
+// SendMessages sends messages to the outgoing channel
+func SendMessages(outChan chan<- pb.Msg) {
+	setup()
+	defer rpio.Close()
+	for {
+		distance := measure()
+		msg := pb.Msg{Payload: map[string]string{"distance": fmt.Sprintf("%f", distance)}}
+		outChan <- msg
+
 		time.Sleep(time.Second)
 	}
 }
 
-func ping() {
-	if err := rpio.Open(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+// HandleMessages handles messages coming from the incoming channel (from the gRPC channel)
+func HandleMessages(inChan <-chan pb.Msg) {
+	setup()
 	defer rpio.Close()
+	for {
+		msg := <-inChan
+		fmt.Println("RECEIVED:", msg)
+	}
+}
 
-	// prepare to emit ping
+func measure() float64 {
+	//rpio.Open()
 	pin := rpio.Pin(20)
 	pin.Output()
 	pin.Low()
@@ -57,11 +79,9 @@ func ping() {
 
 	// calculate distance
 	duration := pulseEnd.Sub(pulseStart)
-
 	distanceCm := duration.Seconds() * 304 * 100 / 2
 
-	fmt.Println("start      :", measuringStart)
-	fmt.Println("pulse start:", pulseStart)
-	fmt.Println("pulse end  :", pulseEnd)
 	fmt.Println("Distance (cm) :", distanceCm)
+
+	return distanceCm
 }
