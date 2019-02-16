@@ -15,7 +15,7 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-const gRPCServerAddress = "localhost:10010"
+const gRPCServerAddress = "localhost:10001"
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
