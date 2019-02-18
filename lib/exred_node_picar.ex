@@ -1,6 +1,13 @@
 defmodule Exred.Node.Picar do
   @moduledoc """
   Controls a SunFounder PiCar.
+
+  Messages:
+   %{payload: "stop"}           -> RearWheels.stop()
+   %{payload: {"speed", speed}} -> RearWheels.speed(speed)
+   %{payload: {"left", angle}}  -> FrontWheels.left(angle)
+   %{payload: {"right", angle}} -> FrontWheels.right(angle)
+   %{payload: "straight"}       -> FrontWheels.straight()
   """
 
   @i2c_device "i2c-1"

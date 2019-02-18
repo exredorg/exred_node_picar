@@ -10,9 +10,9 @@ defmodule Exred.Node.Picar.MixProject do
       version: @version,
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
-      deps: deps(),
       description: @description,
-      package: package()
+      package: package(),
+      deps: deps()
     ]
   end
 
@@ -28,7 +28,8 @@ defmodule Exred.Node.Picar.MixProject do
     [
       {:elixir_ale, "~> 1.0"},
       {:exred_nodeprototype, "~> 0.2"},
-      {:ex_doc, "~> 0.19.0", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.19.0", only: :dev, runtime: false},
+      {:exred_nodetest, "~> 0.1.0", only: :test}
     ]
   end
 
