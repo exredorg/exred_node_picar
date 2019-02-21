@@ -2,19 +2,13 @@ defmodule Exred.Node.PicarTest do
   use ExUnit.Case
   doctest Exred.Node.Picar
 
-#   use Exred.NodeTest, module: Exred.Node.Picar
-# 
-#   setup_all do
-#     start_node()
-#   end
-# 
-#   test "PWM alive" do
-#     assert Process.alive?(Process.whereis(Exred.Node.Picar.PWM))
-#   end
-#   test "FrontWheels alive" do
-#     assert Process.alive?(Process.whereis(Exred.Node.Picar.FrontWheels))
-#   end
-#   test "RearWheels alive" do
-#     assert Process.alive?(Process.whereis(Exred.Node.Picar.RearWheels))
-#   end
+  use Exred.NodeTest, module: Exred.Node.Picar
+
+  @tag :rpi
+  test "PWM, FrontWheel, RearWheel process alive" do
+    start_node()
+    assert Process.alive?(Process.whereis(Exred.Node.Picar.PWM))
+    assert Process.alive?(Process.whereis(Exred.Node.Picar.FrontWheels))
+    assert Process.alive?(Process.whereis(Exred.Node.Picar.RearWheels))
+  end
 end
