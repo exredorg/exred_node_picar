@@ -14,7 +14,7 @@ defmodule Exred.Node.Picar do
   @i2c_address 0x40
 
   @name "PiCar"
-  @category "daemon"
+  @category "Device"
   @info @moduledoc
   @config %{
     name: %{
